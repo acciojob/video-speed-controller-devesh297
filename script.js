@@ -1,51 +1,48 @@
-const video = document.querySelector('.viewer');
-const playButton = document.querySelector('.toggle');
-const progress = document.querySelector('.progress');
-const volumeControl = document.querySelector('.volume');
-const playbackSpeedControl = document.querySelector('.playbackSpeed');
-const skipButtons = document.querySelectorAll('.skip');
+const video = document.querySelector('.player__video');
+const toggle = document.querySelector(".toggle");
+const progress = document.querySelector(".progress");
+const progressFilled = document.querySelector(".progress__filled");
+const inputs = document.querySelectorAll(".controls input");
+const skipButtons = document.querySelectorAll(".skip");
 
 // Play/Pause Toggle
 function togglePlay() {
     if (video.paused) {
         video.play();
-        playButton.textContent = '❚ ❚';
+        toggle.textContent = "❚ ❚";
     } else {
         video.pause();
-        playButton.textContent = '►';
+        toggle.textContent = "►";
     }
 }
-
-playButton.addEventListener('click', togglePlay);
-video.addEventListener('click', togglePlay);
 
 // Update Progress Bar
 function updateProgress() {
     const percent = (video.currentTime / video.duration) * 100;
     progress.value = percent;
+    progressFilled.style.width = ${percent}%;  // Update progress bar width
 }
 
-video.addEventListener('timeupdate', updateProgress);
 
-// Seek Video
-progress.addEventListener('input', function () {
-    const newTime = (progress.value * video.duration) / 100;
-    video.currentTime = newTime;
-});
+function setProgress() {
+    video.currentTime = (progress.value / 100) * video.duration;
+}
 
-// Volume Control
-volumeControl.addEventListener('input', function () {
-    video.volume = volumeControl.value;
-});
+function handleUpdate() {
+    const suffix = this.dataset.sizing || '';  
+    document.documentElement.style.setProperty(--${this.name}, this.value + suffix);
+    
+    if (this.name === "volume") video.volume = this.value;
+    if (this.name === "playbackSpeed") video.playbackRate = this.value;
+}
 
-// Playback Speed Control
-playbackSpeedControl.addEventListener('input', function () {
-    video.playbackRate = playbackSpeedControl.value;
-});
-
-// Skip Forward/Backward
-skipButtons.forEach(button => {
-    button.addEventListener('click', function () {
-        video.currentTime += parseFloat(button.dataset.skip);
-    });
-});
+function skipTime() {
+    video.currentTime += parseFloat(this.dataset.skip);
+}
+toggle.addEventListener("click", togglePlay);
+video.addEventListener("click", togglePlay);
+video.addEventListener("timeupdate", updateProgress);
+progress.addEventListener("input", setProgress);
+inputs.forEach(input => input.addEventListener("change", handleUpdate));
+inputs.forEach(input => input.addEventListener("mousemove", handleUpdate));
+skipButtons.forEach(button => button.addEventListener("click", skipTime));
